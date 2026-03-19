@@ -1,0 +1,1026 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GestiónProp — Sistema Inmobiliario</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,400&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:      #f0ede8;
+  --bg2:     #faf8f4;
+  --bg3:     #ede9e2;
+  --bg4:     #e3ddd5;
+  --border:  #d5cfc6;
+  --border2: #c4bdb3;
+  --text:    #2e2b26;
+  --text2:   #5a5550;
+  --text3:   #9a9389;
+  --olive:   #6b7a3a;
+  --olive2:  #4a5828;
+  --olive-d: rgba(107,122,58,0.12);
+  --ochre:   #c49a30;
+  --ochre-d: rgba(196,154,48,0.12);
+  --brick:   #a63d2f;
+  --brick-d: rgba(166,61,47,0.10);
+  --copper:  #b87333;
+  --copper-d:rgba(184,115,51,0.12);
+  --green:   #4a6228;
+  --green-d: rgba(74,98,40,0.12);
+  --radius:  6px;
+  --shadow:  0 2px 20px rgba(46,43,38,0.10);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background:var(--bg); color:var(--text); font-family:'DM Sans',sans-serif; font-size:14px; min-height:100vh; display:flex; }
+
+/* SIDEBAR */
+.sidebar { width:224px; min-height:100vh; background:var(--bg2); border-right:1px solid var(--border); border-left:3px solid var(--brick); display:flex; flex-direction:column; position:fixed; top:0;left:0;bottom:0; z-index:100; }
+.sb-logo { padding:22px 18px 18px; border-bottom:1px solid var(--border); }
+.sb-logo h1 { font-family:'Cormorant Garamond',serif; font-size:22px; font-weight:500; color:var(--olive); letter-spacing:0.02em; }
+.sb-logo p  { font-family:'DM Mono',monospace; font-size:9px; color:var(--text3); letter-spacing:0.12em; text-transform:uppercase; margin-top:3px; }
+.sb-nav { flex:1; padding:14px 8px; display:flex; flex-direction:column; gap:1px; }
+.nav-lbl { font-family:'DM Mono',monospace; font-size:9px; letter-spacing:0.14em; text-transform:uppercase; color:var(--text3); padding:10px 10px 3px; margin-top:4px; }
+.nav-btn { display:flex; align-items:center; gap:9px; padding:8px 10px; border-radius:var(--radius); border:none; background:none; color:var(--text2); cursor:pointer; font-size:13px; font-family:'DM Sans',sans-serif; transition:all .13s; text-align:left; width:100%; }
+.nav-btn:hover { background:var(--bg3); color:var(--text); }
+.nav-btn.active { background:var(--olive-d); color:var(--olive2); font-weight:500; }
+.sb-foot { padding:14px 18px; border-top:1px solid var(--border); font-family:'DM Mono',monospace; font-size:9px; color:var(--text3); }
+
+/* MAIN */
+.main { margin-left:224px; flex:1; display:flex; flex-direction:column; min-height:100vh; }
+.topbar { background:var(--bg2); border-bottom:1px solid var(--border); padding:14px 26px; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:50; }
+.topbar h2 { font-family:'Cormorant Garamond',serif; font-size:19px; font-weight:400; }
+.tb-right { display:flex; gap:8px; align-items:center; }
+
+/* BUTTONS */
+.btn { padding:7px 15px; border-radius:var(--radius); border:none; cursor:pointer; font-family:'DM Sans',sans-serif; font-size:13px; font-weight:500; transition:all .13s; display:inline-flex; align-items:center; gap:5px; }
+.btn-primary { background:var(--olive); color:#faf8f4; }
+.btn-primary:hover { background:var(--olive2); }
+.btn-brick { background:var(--brick-d); color:var(--brick); border:1px solid rgba(166,61,47,.22); }
+.btn-brick:hover { background:rgba(166,61,47,.18); }
+.btn-ochre { background:var(--ochre-d); color:#7a6010; border:1px solid rgba(196,154,48,.28); }
+.btn-ochre:hover { background:rgba(196,154,48,.2); }
+.btn-ghost { background:var(--bg3); color:var(--text2); border:1px solid var(--border2); }
+.btn-ghost:hover { color:var(--text); border-color:var(--text3); }
+.btn-sm { padding:5px 10px; font-size:12px; }
+.btn-xs { padding:3px 8px; font-size:11px; border-radius:4px; }
+
+/* PAGES */
+.page { display:none; padding:24px 26px; animation:fadeIn .18s ease; }
+.page.active { display:block; }
+@keyframes fadeIn { from{opacity:0;transform:translateY(3px)} to{opacity:1;transform:translateY(0)} }
+
+/* STAT CARDS */
+.stats-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(155px,1fr)); gap:12px; margin-bottom:22px; }
+.stat-card { background:var(--bg2); border:1px solid var(--border); border-radius:var(--radius); padding:15px 17px; }
+.stat-lbl { font-family:'DM Mono',monospace; font-size:9px; text-transform:uppercase; letter-spacing:.12em; color:var(--text3); margin-bottom:6px; }
+.stat-val { font-family:'Cormorant Garamond',serif; font-size:30px; font-weight:500; color:var(--olive); line-height:1; }
+.stat-sub { font-size:11px; color:var(--text3); margin-top:4px; }
+
+/* CARD */
+.card { background:var(--bg2); border:1px solid var(--border); border-radius:var(--radius); overflow:hidden; margin-bottom:18px; }
+.card-head { background:var(--bg3); padding:11px 18px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; gap:10px; }
+.card-head h3 { font-family:'DM Mono',monospace; font-size:10px; text-transform:uppercase; letter-spacing:.12em; color:var(--text2); }
+.card-body { padding:18px; }
+
+/* TABLE */
+table { width:100%; border-collapse:collapse; }
+thead th { padding:9px 14px; text-align:left; font-family:'DM Mono',monospace; font-size:9px; text-transform:uppercase; letter-spacing:.12em; color:var(--text3); background:var(--bg3); border-bottom:1px solid var(--border); white-space:nowrap; }
+tbody tr { border-bottom:1px solid var(--border); transition:background .1s; }
+tbody tr:last-child { border-bottom:none; }
+tbody tr.cl { cursor:pointer; }
+tbody tr.cl:hover { background:var(--bg3); }
+td { padding:11px 14px; font-size:13px; color:var(--text2); vertical-align:middle; }
+td.bold { color:var(--text); font-weight:500; }
+
+/* BADGES */
+.badge { display:inline-block; padding:2px 8px; border-radius:99px; font-family:'DM Mono',monospace; font-size:9px; font-weight:500; letter-spacing:.05em; white-space:nowrap; }
+.b-olive  { background:var(--olive-d);  color:var(--olive2); border:1px solid rgba(107,122,58,.22); }
+.b-ochre  { background:var(--ochre-d);  color:#7a6010; border:1px solid rgba(196,154,48,.28); }
+.b-brick  { background:var(--brick-d);  color:var(--brick); border:1px solid rgba(166,61,47,.22); }
+.b-copper { background:var(--copper-d); color:#7a4a18; border:1px solid rgba(184,115,51,.25); }
+.b-green  { background:var(--green-d);  color:var(--green); border:1px solid rgba(74,98,40,.22); }
+.b-gray   { background:var(--bg4); color:var(--text3); border:1px solid var(--border); }
+
+/* FORM */
+.fg { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+.fg.g3 { grid-template-columns:1fr 1fr 1fr; }
+.full { grid-column:1/-1; }
+.fsec { grid-column:1/-1; font-family:'DM Mono',monospace; font-size:9px; text-transform:uppercase; letter-spacing:.12em; color:var(--olive); padding:6px 0 3px; border-bottom:1px solid var(--border); margin-top:6px; }
+.field { display:flex; flex-direction:column; gap:5px; }
+.field label { font-size:10px; color:var(--text3); font-family:'DM Mono',monospace; text-transform:uppercase; letter-spacing:.09em; }
+.field input,.field select,.field textarea { background:var(--bg2); border:1px solid var(--border2); border-radius:var(--radius); padding:7px 11px; color:var(--text); font-family:'DM Sans',sans-serif; font-size:13px; outline:none; transition:border .13s; width:100%; }
+.field input:focus,.field select:focus,.field textarea:focus { border-color:var(--olive); }
+.field select option { background:var(--bg2); }
+.field textarea { resize:vertical; min-height:64px; }
+
+/* OVERLAY / MODAL */
+.overlay { display:none; position:fixed; inset:0; background:rgba(46,43,38,.45); z-index:1000; align-items:flex-start; justify-content:center; padding:40px 16px; overflow-y:auto; backdrop-filter:blur(2px); }
+.overlay.open { display:flex; }
+.modal { background:var(--bg2); border:1px solid var(--border2); border-radius:10px; width:100%; max-width:660px; box-shadow:var(--shadow); animation:slideUp .18s ease; margin:auto; }
+.modal.wide { max-width:780px; }
+@keyframes slideUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+.modal-head { padding:18px 22px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; }
+.modal-head h3 { font-family:'Cormorant Garamond',serif; font-size:19px; font-weight:500; }
+.modal-head .sub { font-size:12px; color:var(--text3); margin-top:2px; }
+.modal-x { background:none; border:none; color:var(--text3); font-size:18px; cursor:pointer; padding:2px 6px; border-radius:4px; line-height:1; }
+.modal-x:hover { color:var(--text); background:var(--bg3); }
+.modal-body { padding:22px; }
+.modal-foot { padding:14px 22px; border-top:1px solid var(--border); display:flex; justify-content:flex-end; gap:8px; }
+
+/* TIMELINE */
+.timeline { display:flex; flex-direction:column; }
+.tl-item { display:flex; gap:14px; position:relative; }
+.tl-item:not(:last-child)::before { content:''; position:absolute; left:14px; top:30px; bottom:0; width:1px; background:var(--border); }
+.tl-dot { width:29px; height:29px; border-radius:50%; border:2px solid var(--border2); background:var(--bg2); display:flex; align-items:center; justify-content:center; font-size:12px; flex-shrink:0; margin-top:1px; z-index:1; }
+.tl-dot.ol { border-color:var(--olive);  background:var(--olive-d); }
+.tl-dot.oc { border-color:var(--ochre);  background:var(--ochre-d); }
+.tl-dot.br { border-color:var(--brick);  background:var(--brick-d); }
+.tl-dot.cu { border-color:var(--copper); background:var(--copper-d); }
+.tl-dot.gr { border-color:var(--green);  background:var(--green-d); }
+.tl-content { flex:1; padding:0 0 18px; }
+.tl-hd { display:flex; align-items:center; justify-content:space-between; gap:8px; flex-wrap:wrap; margin-bottom:6px; }
+.tl-title { font-size:13px; font-weight:500; color:var(--text); }
+.tl-date  { font-family:'DM Mono',monospace; font-size:10px; color:var(--text3); }
+.tl-body  { background:var(--bg3); border:1px solid var(--border); border-radius:var(--radius); padding:10px 13px; font-size:12.5px; color:var(--text2); line-height:1.55; }
+
+/* FUNNEL */
+.funnel { display:flex; flex-direction:column; gap:8px; }
+.fn-step { display:flex; align-items:center; gap:10px; }
+.fn-n   { font-family:'DM Mono',monospace; font-size:12px; color:var(--olive); min-width:22px; text-align:right; }
+.fn-bw  { flex:1; height:7px; background:var(--bg4); border-radius:4px; overflow:hidden; }
+.fn-bar { height:100%; border-radius:4px; transition:width .5s; }
+.fn-lbl { font-size:12px; color:var(--text2); min-width:140px; }
+.fn-pct { font-family:'DM Mono',monospace; font-size:10px; color:var(--text3); min-width:32px; text-align:right; }
+
+/* MOTIVOS BARS */
+.mv-row { display:flex; align-items:center; gap:8px; margin-bottom:8px; }
+.mv-lbl { font-size:12.5px; color:var(--text2); flex:1; }
+.mv-trk { width:100px; height:5px; background:var(--bg4); border-radius:3px; overflow:hidden; }
+.mv-fill{ height:100%; border-radius:3px; }
+.mv-n   { font-family:'DM Mono',monospace; font-size:10px; color:var(--text3); min-width:16px; text-align:right; }
+
+/* SEARCH */
+.search-inp { background:var(--bg3); border:1px solid var(--border2); border-radius:var(--radius); padding:6px 11px; color:var(--text); font-family:'DM Sans',sans-serif; font-size:13px; outline:none; width:210px; }
+.search-inp:focus { border-color:var(--olive); }
+
+/* MISC */
+.mono { font-family:'DM Mono',monospace; }
+.toggle-wrap { display:flex; border:1px solid var(--border2); border-radius:var(--radius); overflow:hidden; }
+.tog { padding:5px 13px; background:none; border:none; color:var(--text3); font-size:11px; font-family:'DM Mono',monospace; cursor:pointer; transition:all .13s; text-transform:uppercase; letter-spacing:.07em; }
+.tog.active { background:var(--olive-d); color:var(--olive2); }
+.chip { display:inline-flex; align-items:center; gap:4px; padding:2px 7px; border-radius:99px; font-size:11px; color:var(--text2); background:var(--bg4); border:1px solid var(--border); margin:2px; }
+.divider { height:1px; background:var(--border); margin:14px 0; }
+.empty { text-align:center; padding:48px 20px; color:var(--text3); }
+.empty-icon { font-size:36px; margin-bottom:10px; opacity:.35; }
+.empty h4 { font-family:'Cormorant Garamond',serif; font-size:18px; color:var(--text2); margin-bottom:5px; }
+.empty p { font-size:13px; }
+.dg { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+.dsec { background:var(--bg3); border:1px solid var(--border); border-radius:var(--radius); padding:14px; }
+.dsec h4 { font-family:'DM Mono',monospace; font-size:9px; text-transform:uppercase; letter-spacing:.12em; color:var(--olive); margin-bottom:10px; padding-bottom:7px; border-bottom:1px solid var(--border); }
+.drow { display:flex; justify-content:space-between; padding:4px 0; border-bottom:1px solid var(--border); gap:8px; }
+.drow:last-child { border-bottom:none; }
+.dk { font-size:11px; color:var(--text3); flex-shrink:0; }
+.dv { font-size:12.5px; color:var(--text); text-align:right; }
+
+@media print {
+  .sidebar,.topbar,.btn,input,select,.overlay { display:none!important; }
+  .main { margin-left:0!important; }
+  body { background:white!important; }
+  .page { display:none!important; padding:0!important; }
+  #pg-informe { display:block!important; }
+}
+::-webkit-scrollbar { width:5px; height:5px; }
+::-webkit-scrollbar-track { background:var(--bg); }
+::-webkit-scrollbar-thumb { background:var(--border2); border-radius:3px; }
+@media(max-width:860px) { .sidebar{display:none;} .main{margin-left:0;} .fg{grid-template-columns:1fr;} .dg{grid-template-columns:1fr;} }
+
+/* TOAST */
+
+/* ── LOCK SCREEN ── */
+#lock-screen { position:fixed; inset:0; background:var(--bg); display:flex; align-items:center; justify-content:center; z-index:99999; }
+.lk-card { background:var(--bg2); border:1px solid var(--border2); border-radius:12px; padding:38px 42px; width:340px; box-shadow:var(--shadow); text-align:center; }
+.lk-icon { font-size:34px; margin-bottom:16px; }
+.lk-card h2 { font-family:'Cormorant Garamond',serif; font-size:22px; font-weight:400; color:var(--text); margin-bottom:4px; }
+.lk-card p { font-size:12px; color:var(--text3); margin-bottom:22px; }
+.lk-input { width:100%; padding:10px 14px; border:1px solid var(--border2); border-radius:var(--radius); background:var(--bg); color:var(--text); font-family:'DM Sans',sans-serif; font-size:15px; letter-spacing:.15em; outline:none; text-align:center; transition:border .13s; }
+.lk-input:focus { border-color:var(--olive); }
+.lk-btn { width:100%; margin-top:12px; padding:10px; background:var(--olive); color:#faf8f4; border:none; border-radius:var(--radius); font-family:'DM Sans',sans-serif; font-size:13px; font-weight:500; cursor:pointer; transition:background .13s; }
+.lk-btn:hover { background:var(--olive2); }
+.lk-err { font-size:12px; color:var(--brick); margin-top:8px; min-height:16px; }
+.lk-hint { font-size:11px; color:var(--text3); margin-top:12px; line-height:1.6; }
+
+</style>
+</head>
+<body>
+
+
+<!-- PANTALLA DE BLOQUEO -->
+<div id="lock-screen">
+  <div class="lk-card">
+    <div class="lk-icon">🔒</div>
+    <h2>GestiónProp</h2>
+    <p>Sistema de gestión inmobiliaria</p>
+    <input class="lk-input" id="pw-input" type="password" placeholder="Contraseña"
+      onkeydown="if(event.key==='Enter')checkPw()">
+    <button class="lk-btn" onclick="checkPw()">Ingresar</button>
+    <div class="lk-err" id="pw-err"></div>
+    <div class="lk-hint" id="pw-hint"></div>
+  </div>
+</div>
+
+<aside class="sidebar">
+  <div class="sb-logo"><h1>GestiónProp</h1><p>Sistema inmobiliario</p></div>
+  <nav class="sb-nav">
+    <span class="nav-lbl">Panel</span>
+    <button class="nav-btn active" onclick="nav('dashboard')">◈ Dashboard</button>
+    <span class="nav-lbl">Inmuebles</span>
+    <button class="nav-btn" onclick="nav('inmuebles')">⊞ Cartera</button>
+    <button class="nav-btn" onclick="openNuevoInm()">＋ Nuevo inmueble</button>
+    <span class="nav-lbl">Informes</span>
+    <button class="nav-btn" onclick="nav('informe')">▤ Informe propietario</button>
+    <button class="nav-btn" onclick="nav('estadisticas')">◎ Estadísticas</button>
+  </nav>
+  <div class="sb-nav" style="border-top:1px solid var(--border);padding-top:8px;margin-top:0;flex:0">
+    <button class="nav-btn" onclick="showChangePw()" style="font-size:12px;">🔑 Cambiar contraseña</button>
+    <button class="nav-btn" onclick="logout()" style="font-size:12px;color:var(--brick)">⎋ Cerrar sesión</button>
+  </div>
+  <div class="sb-foot">
+    <div>v2.1 · GestiónProp</div>
+    <div style="margin-top:5px;font-size:8px;color:var(--border2);line-height:1.4">Datos guardados<br>automáticamente en la nube</div>
+  </div>
+</aside>
+
+<main class="main">
+  <div class="topbar">
+    <h2 id="page-title">Dashboard</h2>
+    <div class="tb-right">
+      <button class="btn btn-ghost btn-sm" onclick="exportCSV()">⬇ Exportar CSV</button>
+      <button class="btn btn-primary btn-sm" onclick="openNuevoInm()">+ Nuevo inmueble</button>
+    </div>
+  </div>
+
+
+  <!-- DASHBOARD -->
+  <div id="pg-dashboard" class="page active">
+    <div class="stats-row" id="dash-stats"></div>
+    <div style="display:grid;grid-template-columns:1.4fr 1fr;gap:18px;">
+      <div class="card"><div class="card-head"><h3>Inmuebles recientes</h3></div><div id="dash-recent"></div></div>
+      <div class="card"><div class="card-head"><h3>Embudo global</h3></div><div class="card-body"><div class="funnel" id="dash-funnel"></div></div></div>
+    </div>
+  </div>
+
+  <!-- CARTERA -->
+  <div id="pg-inmuebles" class="page">
+    <div class="card">
+      <div class="card-head">
+        <h3>Cartera de inmuebles</h3>
+        <input class="search-inp" id="search-inp" placeholder="Buscar…" oninput="renderCartera()">
+      </div>
+      <table>
+        <thead><tr><th>Inmueble / Dirección</th><th>Tipo</th><th>Operación</th><th>Estado</th><th>Captación</th><th>Consultas</th><th>Precio pub.</th><th></th></tr></thead>
+        <tbody id="cartera-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- DETALLE INMUEBLE -->
+  <div id="pg-detalle" class="page"><div id="detalle-content"></div></div>
+
+  <!-- INFORME -->
+  <div id="pg-informe" class="page">
+    <div style="display:flex;gap:14px;align-items:flex-end;margin-bottom:20px;flex-wrap:wrap;">
+      <div class="field" style="flex:0 0 200px;">
+        <label>Propietario</label>
+        <select id="inf-prop" onchange="renderInforme()"><option value="">Todos</option></select>
+      </div>
+      <div class="toggle-wrap">
+        <button class="tog active" onclick="setPeriod('semanal',this)">Semanal</button>
+        <button class="tog" onclick="setPeriod('mensual',this)">Mensual</button>
+      </div>
+      <button class="btn btn-ghost btn-sm" onclick="window.print()">⎙ Imprimir</button>
+    </div>
+    <div id="informe-body"></div>
+  </div>
+
+  <!-- ESTADÍSTICAS -->
+  <div id="pg-estadisticas" class="page">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;">
+      <div class="card"><div class="card-head"><h3>Por tipo de inmueble</h3></div><div class="card-body" id="st-tipo"></div></div>
+      <div class="card"><div class="card-head"><h3>Por tipo de operación</h3></div><div class="card-body" id="st-op"></div></div>
+      <div class="card"><div class="card-head"><h3>Motivos sin visita coordinada</h3></div><div class="card-body" id="st-novis"></div></div>
+      <div class="card"><div class="card-head"><h3>Motivos sin avance post-visita</h3></div><div class="card-body" id="st-noav"></div></div>
+    </div>
+  </div>
+</main>
+
+<!-- MODAL: NUEVO/EDITAR INMUEBLE -->
+<div class="overlay" id="ov-inm">
+  <div class="modal">
+    <div class="modal-head">
+      <div><h3 id="mi-title">Nuevo inmueble</h3></div>
+      <button class="modal-x" onclick="closeOv('ov-inm')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="fg">
+        <div class="fsec">Datos del inmueble</div>
+        <div class="field full"><label>Dirección / Identificación *</label><input id="mi-dir" type="text" placeholder="Ej: Av. Corrientes 1234, CABA"></div>
+        <div class="field"><label>Tipo de inmueble</label>
+          <select id="mi-tipo"><option value="">—</option><option>Terreno</option><option>Casa</option><option>Departamento</option><option>PH</option><option>Local comercial</option><option>Oficina</option><option>Cochera</option><option>Galpón</option><option>Otro</option></select></div>
+        <div class="field"><label>Operación</label>
+          <select id="mi-op"><option value="">—</option><option>Venta</option><option>Alquiler</option><option>Alquiler temporario</option></select></div>
+        <div class="field"><label>Precio publicado</label><input id="mi-precio" type="text" placeholder="Ej: USD 150.000"></div>
+        <div class="field"><label>Propietario</label><input id="mi-prop" type="text" placeholder="Nombre del propietario"></div>
+        <div class="field"><label>Fecha de captación</label><input id="mi-capt" type="date"></div>
+        <div class="field"><label>Fecha de publicación</label><input id="mi-pub" type="date"></div>
+        <div class="field full"><label>Observaciones generales</label><textarea id="mi-obs" placeholder="Características, condiciones, etc."></textarea></div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeOv('ov-inm')">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveInm()">Guardar inmueble</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: NUEVA CONSULTA -->
+<div class="overlay" id="ov-cons">
+  <div class="modal">
+    <div class="modal-head">
+      <div><h3>Nueva consulta</h3><div class="sub" id="nc-sub"></div></div>
+      <button class="modal-x" onclick="closeOv('ov-cons')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="fg">
+        <div class="fsec">Datos del interesado</div>
+        <div class="field"><label>Nombre / Contacto *</label><input id="nc-nombre" type="text" placeholder="Nombre del interesado"></div>
+        <div class="field"><label>Fecha de consulta</label><input id="nc-fecha" type="date"></div>
+        <div class="field"><label>Canal de consulta</label>
+          <select id="nc-canal"><option value="">—</option><option>Portal inmobiliario</option><option>Instagram / Redes</option><option>WhatsApp directo</option><option>Cartel / Referido</option><option>Llamada telefónica</option><option>Otro</option></select></div>
+        <div class="field"><label>Observaciones iniciales</label><input id="nc-obs" type="text" placeholder="Qué buscaba, consulta general…"></div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeOv('ov-cons')">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveCons()">Registrar consulta</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: ACTUALIZAR CONSULTA -->
+<div class="overlay" id="ov-upd">
+  <div class="modal wide">
+    <div class="modal-head">
+      <div><h3 id="upd-title">Actualizar consulta</h3><div class="sub" id="upd-sub"></div></div>
+      <button class="modal-x" onclick="closeOv('ov-upd')">✕</button>
+    </div>
+    <div class="modal-body" id="upd-body"></div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeOv('ov-upd')">Cancelar</button>
+      <button class="btn btn-primary" id="upd-save">Guardar movimiento</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── STORAGE (GitHub Pages + Claude persistent storage) ──
+const STORE_KEY = 'gp3_data';
+const PW_KEY    = 'gp3_pw';
+const SESS_KEY  = 'gp3_sess';
+const DEFAULT_PW = 'inmobiliaria2025';
+
+let DB = { inm:[], cons:[] };
+let currentPW = DEFAULT_PW;
+
+async function initStorage() {
+  // Load data
+  try {
+    const r = await window.storage.get(STORE_KEY);
+    if (r && r.value) {
+      const parsed = JSON.parse(r.value);
+      DB = parsed;
+      if (!DB.inm)  DB.inm  = [];
+      if (!DB.cons) DB.cons = [];
+    }
+  } catch(e) {
+    DB = { inm:[], cons:[] };
+  }
+  // Load password
+  try {
+    const r = await window.storage.get(PW_KEY);
+    if (r && r.value) currentPW = r.value;
+  } catch(e) { currentPW = DEFAULT_PW; }
+}
+
+async function save() {
+  try {
+    await window.storage.set(STORE_KEY, JSON.stringify(DB));
+  } catch(e) {
+    showToast('error','⚠️','Error al guardar','No se pudo guardar. Intentá de nuevo.');
+  }
+}
+
+async function savePW(pw) {
+  await window.storage.set(PW_KEY, pw);
+}
+
+// ── CONTRASEÑA ──────────────────────────────────
+function checkPw() {
+  const v = document.getElementById('pw-input').value;
+  const err = document.getElementById('pw-err');
+  if (v === currentPW) {
+    sessionStorage.setItem(SESS_KEY, 'ok');
+    document.getElementById('lock-screen').style.display = 'none';
+    renderDashboard();
+  } else {
+    err.textContent = 'Contraseña incorrecta. Intentá de nuevo.';
+    document.getElementById('pw-input').value = '';
+    document.getElementById('pw-input').focus();
+    setTimeout(() => { err.textContent = ''; }, 3000);
+  }
+}
+
+function logout() {
+  sessionStorage.removeItem(SESS_KEY);
+  document.getElementById('lock-screen').style.display = 'flex';
+  document.getElementById('pw-input').value = '';
+  document.getElementById('pw-err').textContent = '';
+  setTimeout(() => document.getElementById('pw-input').focus(), 100);
+}
+
+function showChangePw() {
+  document.getElementById('pw-msg').textContent = '';
+  ['pw-cur','pw-new','pw-con'].forEach(id => document.getElementById(id).value = '');
+  openOv('ov-pw');
+}
+
+async function changePw() {
+  const cur = document.getElementById('pw-cur').value;
+  const nw  = document.getElementById('pw-new').value;
+  const con = document.getElementById('pw-con').value;
+  const msg = document.getElementById('pw-msg');
+  if (cur !== currentPW) { msg.textContent = 'La contraseña actual es incorrecta.'; return; }
+  if (nw.length < 6)     { msg.textContent = 'La nueva contraseña debe tener al menos 6 caracteres.'; return; }
+  if (nw !== con)        { msg.textContent = 'Las contraseñas no coinciden.'; return; }
+  currentPW = nw;
+  await savePW(nw);
+  closeOv('ov-pw');
+  showToast('ok','✅','Contraseña actualizada','Ya podés usar tu nueva contraseña.');
+}
+
+// ── STORE (mantiene compatibilidad con el resto del código) ──
+if (!DB.inm)  DB.inm  = [];
+if (!DB.cons) DB.cons = []; || '{"inm":[],"cons":[]}');
+if (!DB.inm)  DB.inm  = [];
+if (!DB.cons) DB.cons = [];
+// save() is defined above as async
+function uid()  { return Date.now().toString(36) + Math.random().toString(36).slice(2,5); }
+function today(){ return new Date().toISOString().slice(0,10); }
+
+let editInmId = null, curInmId = null, newConsInmId = null, updConsId = null, reportPeriod = 'semanal';
+
+// ── NAV ───────────────────────────────────────
+const pgTitles = { dashboard:'Dashboard', inmuebles:'Cartera de inmuebles', detalle:'Detalle del inmueble', informe:'Informe para propietario', estadisticas:'Estadísticas globales' };
+function nav(id) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('pg-'+id)?.classList.add('active');
+  document.querySelectorAll('.nav-btn').forEach(b=>{ if(b.getAttribute('onclick')?.includes("'"+id+"'")) b.classList.add('active'); });
+  document.getElementById('page-title').textContent = pgTitles[id]||'';
+  if(id==='dashboard')   renderDashboard();
+  if(id==='inmuebles')   renderCartera();
+  if(id==='informe')     renderInforme();
+  if(id==='estadisticas')renderEstadisticas();
+}
+function navDetalle(id) { curInmId=id; nav('detalle'); renderDetalle(id); }
+
+// ── HELPERS ───────────────────────────────────
+function fd(d) { if(!d) return '—'; const [y,m,di]=d.split('-'); return `${di}/${m}/${y}`; }
+function consOf(id){ return DB.cons.filter(c=>c.inmId===id); }
+function yn(v){ return v==='si'?'<span style="color:var(--green);font-weight:500">✓ Sí</span>':v==='no'?'<span style="color:var(--brick)">✗ No</span>':'<span style="color:var(--text3)">—</span>'; }
+
+function bInm(e){
+  const m={activo:'b-olive Activo',reservado:'b-ochre Reservado','en-proceso':'b-copper En proceso',concretado:'b-green Concretado',retirado:'b-gray Retirado'};
+  const [c,...r]=(m[e]||'b-gray '+e).split(' '); return `<span class="badge ${c}">${r.join(' ')}</span>`;
+}
+function bCons(e){
+  const m={nueva:'b-gray Nueva','sin-visita':'b-brick Sin visita','con-visita':'b-olive Con visita','sin-avance':'b-brick Sin avance',avance:'b-copper Con interés',senia:'b-ochre Con seña',concretada:'b-green Concretada',cerrada:'b-gray Cerrada'};
+  const [c,...r]=(m[e]||'b-gray '+e).split(' '); return `<span class="badge ${c}">${r.join(' ')}</span>`;
+}
+function bOp(op){ if(!op) return '—'; const c=op==='Venta'?'b-olive':op.includes('temp')?'b-copper':'b-ochre'; return `<span class="badge ${c}">${op}</span>`; }
+
+function labelAcc(a){
+  const m={'no-coordina':'No se coordinó visita','visita-coord':'Visita coordinada','visita-real':'Visita realizada',
+    avance:'Avanza — hay interés','no-avance':'No avanzó post-visita',senia:'Seña / Reserva recibida',
+    concretar:'Operación concretada',cerrar:'Consulta cerrada',nota:'Nota de seguimiento'};
+  return m[a]||a;
+}
+function labelEx(k){
+  const m={'precio-cierre':'Precio cierre','instrumento':'Instrumento','fecha-firma':'Firma','fecha-escritura':'Escritura',
+    'monto-senia':'Monto seña','fecha-senia':'Fecha seña','fecha-vis':'Visita pactada','escritura-pend':'Escritura pendiente'};
+  return m[k]||k;
+}
+
+// ── INMUEBLES CRUD ────────────────────────────
+function openNuevoInm(id) {
+  editInmId = id||null;
+  const d = id ? DB.inm.find(i=>i.id===id) : null;
+  document.getElementById('mi-title').textContent = d ? 'Editar inmueble' : 'Nuevo inmueble';
+  document.getElementById('mi-dir').value    = d?.dir   ||'';
+  document.getElementById('mi-tipo').value   = d?.tipo  ||'';
+  document.getElementById('mi-op').value     = d?.op    ||'';
+  document.getElementById('mi-precio').value = d?.precio||'';
+  document.getElementById('mi-prop').value   = d?.prop  ||'';
+  document.getElementById('mi-capt').value   = d?.capt  ||'';
+  document.getElementById('mi-pub').value    = d?.pub   ||'';
+  document.getElementById('mi-obs').value    = d?.obs   ||'';
+  openOv('ov-inm');
+}
+function saveInm() {
+  const dir = document.getElementById('mi-dir').value.trim();
+  if(!dir){ alert('Ingresá una dirección.'); return; }
+  const ex = editInmId ? DB.inm.find(i=>i.id===editInmId) : null;
+  const d = { id:ex?.id||uid(), dir, tipo:document.getElementById('mi-tipo').value, op:document.getElementById('mi-op').value,
+    precio:document.getElementById('mi-precio').value, prop:document.getElementById('mi-prop').value,
+    capt:document.getElementById('mi-capt').value, pub:document.getElementById('mi-pub').value,
+    obs:document.getElementById('mi-obs').value, estado:ex?.estado||'activo', creadoEn:ex?.creadoEn||new Date().toISOString() };
+  if(editInmId){ const i=DB.inm.findIndex(x=>x.id===editInmId); DB.inm[i]=d; } else { DB.inm.push(d); }
+  save(); closeOv('ov-inm');
+  if(document.getElementById('pg-inmuebles').classList.contains('active')) renderCartera();
+  if(document.getElementById('pg-dashboard').classList.contains('active')) renderDashboard();
+  if(document.getElementById('pg-detalle').classList.contains('active') && editInmId) renderDetalle(editInmId);
+}
+function deleteInm(id) {
+  if(!confirm('¿Eliminar inmueble y todas sus consultas?')) return;
+  DB.inm  = DB.inm.filter(i=>i.id!==id);
+  DB.cons = DB.cons.filter(c=>c.inmId!==id);
+  save(); nav('inmuebles');
+}
+function setEstadoInm(id, estado) {
+  const inm = DB.inm.find(i=>i.id===id); if(inm){ inm.estado=estado; save(); }
+}
+function syncEstadoInm(inmId) {
+  const inm = DB.inm.find(i=>i.id===inmId); if(!inm) return;
+  const cs = consOf(inmId);
+  if(cs.some(c=>c.estado==='concretada'))    inm.estado='concretado';
+  else if(cs.some(c=>c.estado==='senia'))    inm.estado='reservado';
+  else if(cs.some(c=>c.estado==='avance'))   inm.estado='en-proceso';
+  else if(inm.estado!=='retirado')           inm.estado='activo';
+  save();
+}
+
+// ── CONSULTAS CRUD ────────────────────────────
+function openNuevaCons(inmId) {
+  newConsInmId = inmId;
+  const inm = DB.inm.find(i=>i.id===inmId);
+  document.getElementById('nc-sub').textContent = inm?.dir||'';
+  document.getElementById('nc-nombre').value='';
+  document.getElementById('nc-fecha').value=today();
+  document.getElementById('nc-canal').value='';
+  document.getElementById('nc-obs').value='';
+  openOv('ov-cons');
+}
+function saveCons() {
+  const nombre = document.getElementById('nc-nombre').value.trim();
+  if(!nombre){ alert('Ingresá un nombre.'); return; }
+  DB.cons.push({ id:uid(), inmId:newConsInmId, nombre, fecha:document.getElementById('nc-fecha').value,
+    canal:document.getElementById('nc-canal').value, obs:document.getElementById('nc-obs').value,
+    estado:'nueva', pasos:[], creadoEn:new Date().toISOString() });
+  save(); closeOv('ov-cons'); renderDetalle(newConsInmId);
+}
+function deleteCons(cId, inmId) {
+  if(!confirm('¿Eliminar esta consulta?')) return;
+  DB.cons = DB.cons.filter(c=>c.id!==cId);
+  syncEstadoInm(inmId); save(); renderDetalle(inmId);
+}
+
+// ── ACTUALIZAR CONSULTA ───────────────────────
+function openUpdCons(cId) {
+  updConsId = cId;
+  const c   = DB.cons.find(x=>x.id===cId);
+  const inm = DB.inm.find(i=>i.id===c.inmId);
+  document.getElementById('upd-title').textContent = 'Actualizar — '+c.nombre;
+  document.getElementById('upd-sub').textContent   = inm?.dir||'';
+  document.getElementById('upd-body').innerHTML    = buildUpdForm(c, inm);
+  document.getElementById('upd-save').onclick      = ()=>saveUpd(cId);
+  openOv('ov-upd');
+}
+
+function buildUpdForm(c, inm) {
+  const s=c.estado, esVenta=inm?.op==='Venta';
+  const opts = [];
+  if(['nueva','sin-visita','con-visita','avance'].includes(s)) { opts.push(['visita-coord','📅 Visita coordinada']); opts.push(['no-coordina','✗ No se coordina visita']); }
+  if(['con-visita','senia'].includes(s)||s==='nueva') opts.push(['visita-real','🏠 Visita realizada']);
+  if(['con-visita','avance','nueva'].includes(s)) { opts.push(['avance','👍 Avanza — hay interés']); opts.push(['no-avance','✗ No avanzó post-visita']); }
+  if(['con-visita','avance','senia'].includes(s)) { opts.push(['senia','📝 Seña / Reserva recibida']); opts.push(['concretar','✅ Operación concretada']); }
+  if(!['cerrada','concretada'].includes(s)) opts.push(['cerrar','🔒 Cerrar consulta sin operación']);
+  opts.push(['nota','💬 Nota de seguimiento']);
+  return `<div class="fg">
+    <div class="fsec">Registrar nuevo movimiento</div>
+    <div class="field"><label>Fecha</label><input id="ue-fecha" type="date" value="${today()}"></div>
+    <div class="field"><label>Acción a registrar</label>
+      <select id="ue-acc" onchange="buildExtra('${c.id}','${esVenta}')">
+        <option value="">Seleccioná una acción…</option>
+        ${opts.map(([v,l])=>`<option value="${v}">${l}</option>`).join('')}
+      </select></div>
+    <div id="ue-extra" class="full"></div>
+  </div>`;
+}
+
+function buildExtra(cId, esVenta) {
+  const acc = document.getElementById('ue-acc').value;
+  const ev  = (esVenta==='true'||esVenta===true);
+  const fields = {
+    'no-coordina':`<div class="fg">
+      <div class="field full"><label>Motivo por el que no se coordina visita</label>
+        <select id="ue-mot"><option value="">—</option><option>No cumplía con los requisitos</option><option>Precio elevado para su presupuesto</option><option>Zona / ubicación no deseada</option><option>El interesado desistió</option><option>Superficie o ambientes no convenían</option><option>Sin respuesta del interesado</option><option>Otro</option></select></div>
+      <div class="field full"><label>Observaciones</label><input id="ue-obs" type="text" placeholder="Detalle adicional…"></div></div>`,
+    'visita-coord':`<div class="fg">
+      <div class="field"><label>Fecha pactada de visita</label><input id="ue-fvis" type="date"></div>
+      <div class="field"><label>Observaciones</label><input id="ue-obs" type="text" placeholder="Horario, condiciones…"></div></div>`,
+    'visita-real':`<div class="fg">
+      <div class="field full"><label>Observaciones de la visita</label><input id="ue-obs" type="text" placeholder="Impresiones, comentarios del interesado…"></div></div>`,
+    'avance':`<div class="fg">
+      <div class="field full"><label>Observaciones — ¿qué propuso / pidió?</label><input id="ue-obs" type="text" placeholder="Contraoferta, condiciones, etc."></div></div>`,
+    'no-avance':`<div class="fg">
+      <div class="field full"><label>Motivo por el que no avanza</label>
+        <select id="ue-mot"><option value="">—</option><option>Precio fuera de presupuesto</option><option>No le convenció el inmueble</option><option>Encontró otra opción</option><option>Problemas financieros del interesado</option><option>Propietario no acepta condiciones</option><option>Sin respuesta tras la visita</option><option>Otro</option></select></div>
+      <div class="field full"><label>Observaciones</label><input id="ue-obs" type="text" placeholder="Detalle adicional…"></div></div>`,
+    'senia':`<div class="fg">
+      <div class="field"><label>Fecha de seña / reserva</label><input id="ue-fsenia" type="date" value="${today()}"></div>
+      <div class="field"><label>Monto de la seña</label><input id="ue-msenia" type="text" placeholder="Ej: $ 500.000 / USD 3.000"></div>
+      <div class="field full"><label>Observaciones</label><input id="ue-obs" type="text" placeholder="Condiciones, plazo para escritura…"></div></div>`,
+    'concretar':`<div class="fg">
+      ${ev?`<div class="field"><label>Precio de cierre</label><input id="ue-pcierre" type="text" placeholder="Ej: USD 145.000"></div>`:''}
+      <div class="field"><label>Tipo de instrumento</label>
+        <select id="ue-instr"><option value="">—</option>${ev?'<option>Boleto de compra-venta</option><option>Escritura directa</option>':''}<option>Contrato de locación</option><option>Acuerdo privado</option></select></div>
+      <div class="field"><label>Fecha de firma</label><input id="ue-ffirma" type="date" value="${today()}"></div>
+      ${ev?`<div class="field"><label>¿Escritura posterior pendiente?</label><select id="ue-escpend"><option value="">—</option><option value="si">Sí</option><option value="no">No aplica</option></select></div>
+      <div class="field"><label>Fecha de escritura (si ya fue)</label><input id="ue-fesc" type="date"></div>`:''}
+      <div class="field full"><label>Observaciones</label><input id="ue-obs" type="text" placeholder="Condiciones del cierre…"></div></div>`,
+    'cerrar':`<div class="fg">
+      <div class="field full"><label>Motivo del cierre</label>
+        <select id="ue-mot"><option value="">—</option><option>Sin respuesta del interesado</option><option>Encontró otra propiedad</option><option>Cambió de planes</option><option>Precio no acordado</option><option>El propietario retiró el inmueble</option><option>Otro</option></select></div>
+      <div class="field full"><label>Observaciones</label><input id="ue-obs" type="text" placeholder="Detalle…"></div></div>`,
+    'nota':`<div class="fg"><div class="field full"><label>Nota de seguimiento</label><textarea id="ue-obs" placeholder="Ej: llamé y dijo que respondía la semana próxima…"></textarea></div></div>`
+  };
+  document.getElementById('ue-extra').innerHTML = acc ? (`<div class="divider"></div>`+(fields[acc]||'')) : '';
+}
+
+function saveUpd(cId) {
+  const acc = document.getElementById('ue-acc')?.value;
+  if(!acc){ alert('Seleccioná una acción.'); return; }
+  const c = DB.cons.find(x=>x.id===cId); if(!c) return;
+  const paso = { id:uid(), fecha:document.getElementById('ue-fecha')?.value||today(), accion:acc,
+    obs:document.getElementById('ue-obs')?.value||'', motivo:document.getElementById('ue-mot')?.value||'', extra:{} };
+  // extra fields
+  const exMap = {'ue-fvis':'fecha-vis','ue-fsenia':'fecha-senia','ue-msenia':'monto-senia',
+    'ue-pcierre':'precio-cierre','ue-instr':'instrumento','ue-ffirma':'fecha-firma','ue-escpend':'escritura-pend','ue-fesc':'fecha-escritura'};
+  Object.entries(exMap).forEach(([id,key])=>{ const el=document.getElementById(id); if(el&&el.value) paso.extra[key]=el.value; });
+  const estadoMap={'no-coordina':'sin-visita','visita-coord':'con-visita','visita-real':'con-visita',
+    avance:'avance','no-avance':'sin-avance',senia:'senia',concretar:'concretada',cerrar:'cerrada',nota:c.estado};
+  c.estado = estadoMap[acc]||c.estado;
+  c.pasos.push(paso);
+  syncEstadoInm(c.inmId);
+  closeOv('ov-upd'); renderDetalle(c.inmId);
+}
+
+// ── DASHBOARD ─────────────────────────────────
+function renderDashboard() {
+  const ic=DB.inm, cc=DB.cons;
+  const stats=[
+    ['Inmuebles en cartera', ic.length, ic.filter(i=>i.estado==='activo').length+' activos'],
+    ['Total consultas', cc.length, 'registradas'],
+    ['Visitas realizadas', cc.filter(c=>c.pasos?.some(p=>p.accion==='visita-real')).length, 'realizadas'],
+    ['Operaciones concretadas', cc.filter(c=>c.estado==='concretada').length, cc.length?Math.round(cc.filter(c=>c.estado==='concretada').length/cc.length*100)+'% de consultas':'—'],
+    ['Inmuebles concretados', ic.filter(i=>i.estado==='concretado').length, ic.length?Math.round(ic.filter(i=>i.estado==='concretado').length/ic.length*100)+'% de cartera':'—']
+  ];
+  document.getElementById('dash-stats').innerHTML = stats.map(([l,v,s])=>`<div class="stat-card"><div class="stat-lbl">${l}</div><div class="stat-val">${v}</div><div class="stat-sub">${s}</div></div>`).join('');
+  const recent=[...ic].sort((a,b)=>(b.creadoEn||'').localeCompare(a.creadoEn||'')).slice(0,6);
+  document.getElementById('dash-recent').innerHTML = recent.length
+    ? recent.map(i=>{ const nc=consOf(i.id).length; return `<div style="padding:10px 16px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;cursor:pointer;" onclick="navDetalle('${i.id}')">
+      <div><div style="font-size:13px;color:var(--text);font-weight:500">${i.dir}</div><div style="font-size:11px;color:var(--text3);margin-top:2px">${i.tipo||'—'} · ${i.prop||'—'} · <span class="mono" style="color:var(--olive)">${nc}</span> consulta${nc!==1?'s':''}</div></div>${bInm(i.estado)}</div>`; }).join('')
+    : '<div class="empty"><div class="empty-icon">⊞</div><h4>Sin inmuebles</h4></div>';
+  renderFunnelEl('dash-funnel', cc);
+}
+
+function renderFunnelEl(elId, cc) {
+  const tot=cc.length;
+  const steps=[
+    {l:'Consultas recibidas',   v:tot,                                                                  c:'#6b7a3a'},
+    {l:'Visita coordinada',     v:cc.filter(c=>c.pasos?.some(p=>['visita-coord','visita-real'].includes(p.accion))).length, c:'#c49a30'},
+    {l:'Visita realizada',      v:cc.filter(c=>c.pasos?.some(p=>p.accion==='visita-real')).length,      c:'#b87333'},
+    {l:'Avanzaron',             v:cc.filter(c=>c.pasos?.some(p=>['avance','senia','concretar'].includes(p.accion))).length, c:'#8a6a3a'},
+    {l:'Seña / Reserva',        v:cc.filter(c=>c.pasos?.some(p=>['senia','concretar'].includes(p.accion))).length, c:'#a07028'},
+    {l:'Concretadas',           v:cc.filter(c=>c.estado==='concretada').length,                         c:'#4a6228'}
+  ];
+  const max=tot||1;
+  document.getElementById(elId).innerHTML = steps.map(s=>`<div class="fn-step">
+    <div class="fn-n">${s.v}</div>
+    <div class="fn-bw"><div class="fn-bar" style="width:${Math.round(s.v/max*100)}%;background:${s.c};"></div></div>
+    <div class="fn-lbl">${s.l}</div>
+    <div class="fn-pct">${tot?Math.round(s.v/max*100):0}%</div></div>`).join('');
+}
+
+// ── CARTERA ───────────────────────────────────
+function renderCartera() {
+  const q=(document.getElementById('search-inp')?.value||'').toLowerCase();
+  const f=DB.inm.filter(i=>i.dir?.toLowerCase().includes(q)||i.tipo?.toLowerCase().includes(q)||i.prop?.toLowerCase().includes(q)||i.op?.toLowerCase().includes(q));
+  const tb=document.getElementById('cartera-tbody');
+  if(!f.length){ tb.innerHTML=`<tr><td colspan="8"><div class="empty"><div class="empty-icon">⊞</div><h4>Sin resultados</h4><p>Registrá tu primer inmueble.</p></div></td></tr>`; return; }
+  tb.innerHTML=f.map(i=>{
+    const nc=consOf(i.id).length;
+    return `<tr class="cl" onclick="navDetalle('${i.id}')">
+      <td class="bold">${i.dir}</td><td>${i.tipo||'—'}</td><td>${bOp(i.op)}</td><td>${bInm(i.estado)}</td>
+      <td style="font-size:12px">${fd(i.capt)}</td>
+      <td><span class="mono" style="color:var(--olive);font-size:13px">${nc}</span></td>
+      <td style="font-size:12px;color:var(--text3)">${i.precio||'—'}</td>
+      <td><button class="btn btn-ghost btn-xs" onclick="event.stopPropagation();openNuevoInm('${i.id}')">Editar</button></td>
+    </tr>`;
+  }).join('');
+}
+
+// ── DETALLE INMUEBLE ──────────────────────────
+function renderDetalle(inmId) {
+  const inm=DB.inm.find(i=>i.id===inmId);
+  if(!inm){ document.getElementById('detalle-content').innerHTML='<div class="empty"><h4>No encontrado</h4></div>'; return; }
+  const cons=consOf(inmId).sort((a,b)=>(b.creadoEn||'').localeCompare(a.creadoEn||''));
+  const concr=cons.find(c=>c.estado==='concretada');
+  const pcierre=concr?.pasos?.find(p=>p.accion==='concretar')?.extra?.['precio-cierre']||'';
+  const totalVis=cons.filter(c=>c.pasos?.some(p=>p.accion==='visita-real')).length;
+  const totalAv =cons.filter(c=>c.pasos?.some(p=>['avance','senia','concretar'].includes(p.accion))).length;
+
+  document.getElementById('detalle-content').innerHTML = `
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:10px;">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <button class="btn btn-ghost btn-sm" onclick="nav('inmuebles')">← Volver</button>
+        <div>
+          <div style="font-family:'Cormorant Garamond',serif;font-size:21px;font-weight:500">${inm.dir}</div>
+          <div style="font-size:12px;color:var(--text3);margin-top:2px">${inm.tipo||'—'} · ${inm.prop||'—'} · ${bOp(inm.op)}</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:7px;align-items:center;flex-wrap:wrap;">
+        ${bInm(inm.estado)}
+        <select class="btn btn-ghost btn-sm" style="cursor:pointer;padding-right:8px;" onchange="cambiarEstInm('${inm.id}',this.value)">
+          <option value="">Estado…</option>
+          <option value="activo">Activo</option><option value="reservado">Reservado</option>
+          <option value="en-proceso">En proceso</option><option value="concretado">Concretado</option><option value="retirado">Retirado</option>
+        </select>
+        <button class="btn btn-ghost btn-sm" onclick="openNuevoInm('${inm.id}')">✎ Editar</button>
+        <button class="btn btn-primary btn-sm" onclick="openNuevaCons('${inm.id}')">+ Nueva consulta</button>
+        <button class="btn btn-brick btn-xs" onclick="deleteInm('${inm.id}')">✕ Eliminar</button>
+      </div>
+    </div>
+
+    <div class="dg" style="margin-bottom:18px;">
+      <div class="dsec">
+        <h4>Datos del inmueble</h4>
+        <div class="drow"><span class="dk">Tipo</span><span class="dv">${inm.tipo||'—'}</span></div>
+        <div class="drow"><span class="dk">Operación</span><span class="dv">${bOp(inm.op)}</span></div>
+        <div class="drow"><span class="dk">Precio publicado</span><span class="dv mono">${inm.precio||'—'}</span></div>
+        ${pcierre?`<div class="drow"><span class="dk">Precio de cierre</span><span class="dv mono" style="color:var(--olive);font-weight:500">${pcierre}</span></div>`:''}
+        <div class="drow"><span class="dk">Propietario</span><span class="dv">${inm.prop||'—'}</span></div>
+        <div class="drow"><span class="dk">Captación</span><span class="dv">${fd(inm.capt)}</span></div>
+        <div class="drow"><span class="dk">Publicación</span><span class="dv">${fd(inm.pub)}</span></div>
+        ${inm.obs?`<div class="drow"><span class="dk">Obs.</span><span class="dv" style="font-size:12px;max-width:220px">${inm.obs}</span></div>`:''}
+      </div>
+      <div class="dsec">
+        <h4>Resumen de consultas</h4>
+        <div class="drow"><span class="dk">Total consultas</span><span class="dv mono" style="color:var(--olive)">${cons.length}</span></div>
+        <div class="drow"><span class="dk">Visitas realizadas</span><span class="dv mono">${totalVis}</span></div>
+        <div class="drow"><span class="dk">Con interés post-visita</span><span class="dv mono">${totalAv}</span></div>
+        <div class="drow"><span class="dk">Concretadas</span><span class="dv mono" style="color:${concr?'var(--green)':'var(--text3)'}">${cons.filter(c=>c.estado==='concretada').length}</span></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <h3>Consultas registradas (${cons.length})</h3>
+        <button class="btn btn-primary btn-sm" onclick="openNuevaCons('${inm.id}')">+ Nueva consulta</button>
+      </div>
+      ${cons.length ? `<table>
+        <thead><tr><th>#</th><th>Interesado</th><th>Fecha</th><th>Canal</th><th>Estado actual</th><th>Último movimiento</th><th>Acciones</th></tr></thead>
+        <tbody>
+          ${cons.map((c,idx)=>{
+            const ult=c.pasos?.slice(-1)[0];
+            return `<tr>
+              <td class="mono" style="color:var(--text3);font-size:11px">${cons.length-idx}</td>
+              <td class="bold">${c.nombre}</td>
+              <td style="font-size:12px">${fd(c.fecha)}</td>
+              <td style="font-size:12px;color:var(--text3)">${c.canal||'—'}</td>
+              <td>${bCons(c.estado)}</td>
+              <td style="font-size:12px;color:var(--text3)">${ult?labelAcc(ult.accion)+' · '+fd(ult.fecha):'—'}</td>
+              <td>
+                <div style="display:flex;gap:4px;flex-wrap:wrap;">
+                  ${!['cerrada','concretada'].includes(c.estado)?`<button class="btn btn-ochre btn-xs" onclick="openUpdCons('${c.id}')">Actualizar</button>`:''}
+                  <button class="btn btn-ghost btn-xs" onclick="toggleTL('tl-${c.id}')">Historial</button>
+                  <button class="btn btn-brick btn-xs" onclick="deleteCons('${c.id}','${inm.id}')">✕</button>
+                </div>
+              </td>
+            </tr>
+            <tr id="tl-${c.id}" style="display:none">
+              <td colspan="7" style="padding:16px 20px;background:var(--bg3);">${renderTL(c)}</td>
+            </tr>`;
+          }).join('')}
+        </tbody>
+      </table>`
+      : '<div class="empty"><div class="empty-icon">💬</div><h4>Sin consultas aún</h4><p>Usá el botón "Nueva consulta" para registrar el primer interesado.</p></div>'}
+    </div>
+  `;
+}
+
+function cambiarEstInm(id, est) { if(!est) return; setEstadoInm(id,est); renderDetalle(id); }
+function toggleTL(id) { const el=document.getElementById(id); if(el) el.style.display=el.style.display==='none'?'':'none'; }
+
+function renderTL(c) {
+  if(!c.pasos?.length) return `<div style="color:var(--text3);font-size:12px;padding:6px">Sin movimientos aún. Usá "Actualizar" para registrar el primer paso.</div>`;
+  const dotCls={'no-coordina':'br','visita-coord':'oc','visita-real':'ol','avance':'ol','no-avance':'br','senia':'cu','concretar':'gr','cerrar':'br','nota':'gray'};
+  const icons  ={'no-coordina':'✗','visita-coord':'📅','visita-real':'🏠','avance':'👍','no-avance':'✗','senia':'📝','concretar':'✅','cerrar':'🔒','nota':'💬'};
+  return `<div class="timeline">`+c.pasos.map(p=>`
+    <div class="tl-item">
+      <div class="tl-dot ${dotCls[p.accion]||'gray'}">${icons[p.accion]||'·'}</div>
+      <div class="tl-content">
+        <div class="tl-hd"><div class="tl-title">${labelAcc(p.accion)}</div><div class="tl-date">${fd(p.fecha)}</div></div>
+        <div class="tl-body">
+          ${p.motivo?`<div><span style="font-size:10px;color:var(--text3);font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:.08em">Motivo:</span> ${p.motivo}</div>`:''}
+          ${p.obs?`<div style="margin-top:${p.motivo?'5px':'0'}">${p.obs}</div>`:''}
+          ${Object.keys(p.extra||{}).length?`<div style="margin-top:6px;display:flex;flex-wrap:wrap">${Object.entries(p.extra).map(([k,v])=>`<span class="chip"><span style="color:var(--text3);font-size:10px">${labelEx(k)}:</span> ${v}</span>`).join('')}</div>`:''}
+          ${!p.motivo&&!p.obs&&!Object.keys(p.extra||{}).length?'<span style="color:var(--text3);font-style:italic">Sin observaciones.</span>':''}
+        </div>
+      </div>
+    </div>`).join('')+'</div>';
+}
+
+// ── INFORME ───────────────────────────────────
+function setPeriod(p,el){ reportPeriod=p; document.querySelectorAll('.tog').forEach(b=>b.classList.remove('active')); el.classList.add('active'); renderInforme(); }
+
+function renderInforme() {
+  const sel=document.getElementById('inf-prop');
+  const cur=sel.value;
+  const props=[...new Set(DB.inm.map(i=>i.prop).filter(Boolean))];
+  sel.innerHTML='<option value="">Todos los propietarios</option>'+props.map(p=>`<option value="${p}">${p}</option>`).join('');
+  sel.value=cur;
+  const filtro=sel.value;
+  const inms=filtro?DB.inm.filter(i=>i.prop===filtro):DB.inm;
+  const ids=new Set(inms.map(i=>i.id));
+  const cc=DB.cons.filter(c=>ids.has(c.inmId));
+
+  if(!inms.length){ document.getElementById('informe-body').innerHTML=`<div class="empty"><div class="empty-icon">▤</div><h4>Sin datos</h4></div>`; return; }
+
+  const visitas=cc.filter(c=>c.pasos?.some(p=>p.accion==='visita-real')).length;
+  const concr=cc.filter(c=>c.estado==='concretada').length;
+  const now=new Date().toLocaleDateString('es-AR');
+  const perLbl=reportPeriod==='semanal'?'Semanal':'Mensual';
+
+  const mvSV={},mvNA={},mvCi={};
+  cc.forEach(c=>{ const p=c.pasos?.find(x=>x.accion==='no-coordina');  if(p?.motivo) mvSV[p.motivo]=(mvSV[p.motivo]||0)+1; });
+  cc.forEach(c=>{ const p=c.pasos?.find(x=>x.accion==='no-avance');    if(p?.motivo) mvNA[p.motivo]=(mvNA[p.motivo]||0)+1; });
+  cc.forEach(c=>{ const p=c.pasos?.find(x=>x.accion==='cerrar');       if(p?.motivo) mvCi[p.motivo]=(mvCi[p.motivo]||0)+1; });
+
+  document.getElementById('informe-body').innerHTML=`
+    <div class="card">
+      <div class="card-head"><h3>Informe ${perLbl} — ${filtro||'Cartera general'}</h3><span class="mono" style="font-size:10px;color:var(--text3)">${now}</span></div>
+      <div class="card-body">
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px">
+          ${[['Inmuebles',inms.length],['Consultas',cc.length],['Visitas realizadas',visitas],['Concretadas',concr]].map(([l,v])=>`
+            <div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);padding:12px 15px">
+              <div style="font-family:'DM Mono',monospace;font-size:9px;text-transform:uppercase;letter-spacing:.1em;color:var(--text3);margin-bottom:5px">${l}</div>
+              <div style="font-family:'Cormorant Garamond',serif;font-size:26px;color:var(--olive)">${v}</div>
+            </div>`).join('')}
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><h3>Detalle por inmueble</h3></div>
+      <div style="overflow-x:auto">
+        <table><thead><tr><th>Inmueble</th><th>Tipo</th><th>Op.</th><th>Precio pub.</th><th>Estado</th><th>Consultas</th><th>Visitas</th><th>Concretado</th><th>Precio cierre</th></tr></thead>
+        <tbody>${inms.map(inm=>{
+          const ic=DB.cons.filter(c=>c.inmId===inm.id);
+          const iv=ic.filter(c=>c.pasos?.some(p=>p.accion==='visita-real')).length;
+          const co=ic.find(c=>c.estado==='concretada');
+          const pc=co?.pasos?.find(p=>p.accion==='concretar')?.extra?.['precio-cierre']||'—';
+          const ff=co?.pasos?.find(p=>p.accion==='concretar')?.extra?.['fecha-firma']||'';
+          return `<tr><td class="bold">${inm.dir}</td><td>${inm.tipo||'—'}</td><td>${bOp(inm.op)}</td>
+            <td class="mono" style="font-size:12px">${inm.precio||'—'}</td><td>${bInm(inm.estado)}</td>
+            <td class="mono" style="color:var(--olive)">${ic.length}</td><td class="mono">${iv}</td>
+            <td>${co?`<span style="color:var(--green);font-weight:500">✓ ${ff?fd(ff):''}</span>`:'—'}</td>
+            <td class="mono" style="color:var(--olive);font-weight:500">${co?pc:'—'}</td></tr>`;
+        }).join('')}</tbody></table>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px">
+      <div class="card"><div class="card-head"><h3>Embudo de conversión</h3></div><div class="card-body"><div class="funnel" id="inf-funnel"></div></div></div>
+      ${Object.keys(mvSV).length?`<div class="card"><div class="card-head"><h3>Motivos sin visita coordinada</h3></div><div class="card-body">${mvBars(mvSV,'#a63d2f')}</div></div>`:''}
+      ${Object.keys(mvNA).length?`<div class="card"><div class="card-head"><h3>Motivos sin avance post-visita</h3></div><div class="card-body">${mvBars(mvNA,'#b87333')}</div></div>`:''}
+      ${Object.keys(mvCi).length?`<div class="card"><div class="card-head"><h3>Motivos de cierre de consulta</h3></div><div class="card-body">${mvBars(mvCi,'#8a6a3a')}</div></div>`:''}
+    </div>
+  `;
+  renderFunnelEl('inf-funnel',cc);
+}
+
+function mvBars(counts,color) {
+  const e=Object.entries(counts).sort((a,b)=>b[1]-a[1]); const max=e[0]?.[1]||1;
+  return e.map(([l,v])=>`<div class="mv-row"><div class="mv-lbl">${l}</div><div class="mv-trk"><div class="mv-fill" style="width:${Math.round(v/max*100)}%;background:${color}"></div></div><div class="mv-n">${v}</div></div>`).join('');
+}
+
+// ── ESTADÍSTICAS ──────────────────────────────
+function renderEstadisticas() {
+  stGroup('st-tipo',DB.inm,'tipo','#6b7a3a');
+  stGroup('st-op',DB.inm,'op','#c49a30');
+  const nv={},na={};
+  DB.cons.forEach(c=>{ const p=c.pasos?.find(x=>x.accion==='no-coordina'); if(p?.motivo) nv[p.motivo]=(nv[p.motivo]||0)+1; });
+  DB.cons.forEach(c=>{ const p=c.pasos?.find(x=>x.accion==='no-avance');   if(p?.motivo) na[p.motivo]=(na[p.motivo]||0)+1; });
+  stMap('st-novis',nv,'#a63d2f'); stMap('st-noav',na,'#b87333');
+}
+function stGroup(elId,arr,field,color){ const c={}; arr.forEach(i=>{ if(i[field]) c[i[field]]=(c[i[field]]||0)+1; }); stMap(elId,c,color); }
+function stMap(elId,c,color) {
+  const e=Object.entries(c).sort((a,b)=>b[1]-a[1]); const max=e[0]?.[1]||1;
+  document.getElementById(elId).innerHTML=e.length
+    ?e.map(([l,v])=>`<div class="mv-row"><div class="mv-lbl">${l}</div><div class="mv-trk" style="width:140px"><div class="mv-fill" style="width:${Math.round(v/max*100)}%;background:${color}"></div></div><div class="mv-n">${v}</div></div>`).join('')
+    :'<div style="color:var(--text3);font-size:13px;text-align:center;padding:16px">Sin datos aún</div>';
+}
+
+// ── MODAL HELPERS ─────────────────────────────
+function openOv(id) { document.getElementById(id).classList.add('open'); }
+function closeOv(id){ document.getElementById(id).classList.remove('open'); }
+document.querySelectorAll('.overlay').forEach(ov=>{ ov.addEventListener('click',e=>{ if(e.target===ov) ov.classList.remove('open'); }); });
+
+// ── EXPORT CSV ────────────────────────────────
+function exportCSV() {
+  if(!DB.inm.length){ alert('Sin datos.'); return; }
+  const h=['Inmueble','Tipo','Operación','Precio pub.','Propietario','Captación','Publicación','Estado inmueble',
+    'Consulta #','Interesado','Fecha consulta','Canal','Estado consulta','Último movimiento',
+    'Motivo sin visita','Motivo sin avance','Precio cierre','Fecha firma','Obs. consulta'];
+  const rows=[];
+  DB.inm.forEach(i=>{ const cs=consOf(i.id); if(!cs.length){ rows.push([i.dir,i.tipo,i.op,i.precio,i.prop,i.capt,i.pub,i.estado].map(v=>`"${(v||'').replace(/"/g,'""')}"`)); } else {
+    cs.forEach((c,idx)=>{
+      const noV=c.pasos?.find(p=>p.accion==='no-coordina'), noA=c.pasos?.find(p=>p.accion==='no-avance'), co=c.pasos?.find(p=>p.accion==='concretar'), ult=c.pasos?.slice(-1)[0];
+      rows.push([i.dir,i.tipo,i.op,i.precio,i.prop,i.capt,i.pub,i.estado,idx+1,c.nombre,c.fecha,c.canal,c.estado,ult?labelAcc(ult.accion):'',noV?.motivo||'',noA?.motivo||'',co?.extra?.['precio-cierre']||'',co?.extra?.['fecha-firma']||'',c.obs||''].map(v=>`"${(v||'').toString().replace(/"/g,'""')}"`));
+    });
+  }});
+  const csv=[h.join(','),...rows.map(r=>r.join(','))].join('\n');
+  const b=new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8;'});
+  const u=URL.createObjectURL(b); const a=document.createElement('a'); a.href=u; a.download='gestionprop.csv'; a.click(); URL.revokeObjectURL(u);
+}
+
+// ── TOAST ─────────────────────────────────────
+let toastTimer = null;
+function showToast(type, icon, title, msg) {
+  let el = document.getElementById('gp-toast');
+  if(!el) {
+    el = document.createElement('div');
+    el.id = 'gp-toast';
+    el.className = 'toast';
+    document.body.appendChild(el);
+  }
+  el.className = `toast t-${type}`;
+  el.innerHTML = `<div class="toast-icon">${icon}</div><div><div style="font-weight:500;margin-bottom:2px">${title}</div><div style="font-size:12px;opacity:.8">${msg}</div></div>`;
+  requestAnimationFrame(()=>{ requestAnimationFrame(()=>{ el.classList.add('show'); }); });
+  if(toastTimer) clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>{ el.classList.remove('show'); }, 4000);
+}
+
+// ── INIT ──────────────────────────────────────
+async function init() {
+  await initStorage();
+  const isFirst = !DB.inm.length && !DB.cons.length && currentPW === DEFAULT_PW;
+  if (isFirst) {
+    document.getElementById('pw-hint').innerHTML =
+      'Contraseña inicial:<br><strong style="color:var(--olive);letter-spacing:.12em">' + DEFAULT_PW + '</strong><br><span style="font-size:10px">Podés cambiarla desde el menú lateral.</span>';
+  }
+  if (sessionStorage.getItem(SESS_KEY) === 'ok') {
+    document.getElementById('lock-screen').style.display = 'none';
+    renderDashboard();
+  } else {
+    setTimeout(() => document.getElementById('pw-input').focus(), 100);
+  }
+}
+
+init();
+</script>
+
+<!-- MODAL: CAMBIAR CONTRASEÑA -->
+<div class="overlay" id="ov-pw">
+  <div class="modal" style="max-width:380px">
+    <div class="modal-head">
+      <div><h3>Cambiar contraseña</h3></div>
+      <button class="modal-x" onclick="closeOv('ov-pw')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="fg">
+        <div class="field full"><label>Contraseña actual</label><input id="pw-cur" type="password"></div>
+        <div class="field full"><label>Nueva contraseña</label><input id="pw-new" type="password"></div>
+        <div class="field full"><label>Confirmar nueva contraseña</label><input id="pw-con" type="password"></div>
+        <div class="full" id="pw-msg" style="font-size:11px;color:var(--brick);min-height:14px"></div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeOv('ov-pw')">Cancelar</button>
+      <button class="btn btn-primary" onclick="changePw()">Guardar contraseña</button>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
